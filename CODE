@@ -1,0 +1,116 @@
+// Define sensor inputs
+int gasSensor = A5;
+int moistureSensor = A1;
+int tempSensor = A2;
+
+const int sensorThres = 500; // Define sensor threshold
+// Initialize variables to store sensor readings
+int moisture = 0;
+int brightness = 0;
+int temperature = 0;
+
+void setup()
+{
+  // Define the mode for sensor pins
+  pinMode(moistureSensor, INPUT);
+  pinMode(gasSensor, INPUT);
+  pinMode(tempSensor, INPUT);
+  
+  // Start the serial communication
+  Serial.begin(9600); 
+  
+  // Define the mode for output pins
+  pinMode(3, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(9, OUTPUT);
+}
+
+// Function to check soil moisture
+void soil_moisture()
+{
+  // Read the moisture sensor value
+  moisture = analogRead(moistureSensor);
+  // Map the moisture value to brightness
+  brightness = map(moisture, 0, 872, 0, 255);
+  
+  // Write the brightness value to the pin
+  analogWrite(3, brightness);
+  
+  // Check if brightness is less than 113
+  if (brightness < 113)
+  {
+    digitalWrite(3, 1);
+  }
+  else
+  {
+    digitalWrite(3, 0);
+  }
+  
+  // Check if moisture is greater than 600
+  if (moisture > 600)
+  {
+    analogWrite(11, 250);
+  }
+  else
+  {
+    analogWrite(11, 0);
+  }
+}
+
+// Function to check temperature
+void temp_sensor()
+{
+  // Read temperature sensor value
+  int tempSensorReading = analogRead(tempSensor);
+  
+  // Map the temperature sensor reading to actual temperature
+  temperature = map(tempSensorReading, 20, 458, -40, 125);
+  
+  // Print the temperature value
+  Serial.println(temperature);
+  
+  // Check if temperature is greater than 20
+  if (temperature > 20)
+  {
+    analogWrite(9, 250);
+  }
+  else
+  {
+    analogWrite(9, 0);
+  }
+}
+
+// Function to check gas sensor
+void gas_sensor()
+{
+  // Read gas sensor value
+  int analogSensor = analogRead(gasSensor);
+  
+  // Check if gas sensor value is greater than threshold
+  if (analogSensor > sensorThres)
+  {
+    digitalWrite(6, HIGH);
+    analogWrite(5, HIGH);
+  }
+  else
+  {
+    digitalWrite(6, LOW);
+    analogWrite(5, HIGH);
+  }
+  // Wait for 100 milliseconds
+  delay(100);
+}
+
+// Main loop
+void loop()
+{
+  // Call function to check gas sensor
+  gas_sensor();
+  
+  // Call function to check soil moisture
+  soil_moisture();
+  
+  // Call function to check temperature sensor
+  temp_sensor();
+}
